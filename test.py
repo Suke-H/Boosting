@@ -2,6 +2,7 @@ from skimage import io
 import numpy as np
 from tqdm import tqdm
 from PIL import Image
+import itertools
 
 from Step05_kNearestNeighbor import ReturnMatchLabel
 
@@ -37,33 +38,41 @@ def LoadDataset(DataFile, SampleNum, ClassNum, ImageSize):
 
     return datas, labels
 
+def DecisionStump(x, phase="DS")
+    # データ数
+    n = x.shape[0]
+    # 一次元配列の要素数
+    d = x.shape[1]
+    # axis
+    axis_list = np.array([i for i in range(n)])
+    # th
+    th_list = np.array([i for i in range(n-1)])
+    # # sign
+    # sign_list = np.array([-1, 1])
+
+    x_mat = np.tile(x, (n-1, 1, 1))
+    x_mat = x_mat.transpose(2, 1, 0)
+    print(x_mat.shape)
+
+    m0 = x.T[:, :n-1]
+    m1 = x.T[:, 1:]
+    m_mat = (m0 + m1) / 2
+    m_mat = np.tile(m_mat, (n, 1, 1))
+    print(m_mat.shape)
+
 def DecisionStump(target, args):
     # 見る次元の場所, しきい値、符号(+1, -1)
-    dim, th, sign = args
+    axis, th, sign = args
     # 1次元に変換
     flat_target = target.ravel()
 
     print(flat_target)
 
-    if flat_target[dim] >= th:
-        print(1)
-        a = input()
+    if flat_target[axis] >= th:
         return sign
 
     else:
-        print(-1)
-        a = input()
         return -sign
-
-# def ErrorCorrectionCode(models, target, ClassCode, args):
-#     # クラスコードのビット数
-#     BitNum = len(models)
-#     # ビット数分のモデルから得られた(-1, 1)の出力を合わせて出力コードとする
-#     OutputCode = np.array([models[i](target, args) for i in range(BitNum)])
-#     # 各クラスコードとの誤差
-#     errors = np.count_nonzero(OutputCode != ClassCode, axis=1)
-#     # 誤差が一番小さいクラスを返す
-#     return errors.argmin()
 
 def BinaryModelError(models, x, ClassCode, ClassNum, args_set):
     # クラスコード
