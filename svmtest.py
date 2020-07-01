@@ -98,13 +98,9 @@ if __name__ == '__main__':
 
     # y = wx + b >= 0を+1に、y < 0を-1に
     eval_y = np.dot(W, test_X.T) + bias
+
+    out = np.full(100, -1)
     p_indices = np.where(eval_y >= 0)
-    p_datas = test_X[p_indices]
-    n_datas = np.delete(test_X, p_indices, axis=0)
-
-    plt.scatter(p_datas[:, 0], p_datas[:, 1], label="positive")
-    plt.scatter(n_datas[:, 0], n_datas[:, 1], label="negative")
-
-    plt.legend()
-    plt.grid()
-    plt.show()
+    out[p_indices] = 1
+    print(p_indices)
+    print(out)
