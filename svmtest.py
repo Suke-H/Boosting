@@ -65,7 +65,7 @@ if __name__ == '__main__':
     N = 1000
     X, y = make_artificial_data(N, phase="train")
 
-    # Q_ij = y_i*y_j*dot(x[i],x[j])
+    # Q_ij = y_i * y_j * dot(x[i], x[j])
     _Q = np.zeros((N, N))
     for i in range(N):
         for j in range(N):

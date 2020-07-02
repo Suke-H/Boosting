@@ -1,6 +1,7 @@
 import numpy as np
 import cvxopt
 import itertools
+from tqdm import tqdm
 
 class binary_SVM:
     def __init__(self, dim):
@@ -18,6 +19,7 @@ class binary_SVM:
             for j in range(N):
                 _Q[i, j] = y[i]*y[j]*np.dot(x[i], x[j])
         Q = cvxopt.matrix(_Q)
+
         # p = [-1, -1, ...]
         p = cvxopt.matrix(-np.ones(N))
         # G = -I
@@ -38,7 +40,7 @@ class binary_SVM:
         # w_d = Σ alpha * y[i] * x[i][d] = dot(alpha*y, x[d])
         self.W = np.dot(alpha * y, x)
         # b = (dot(w, x+) + dot(w, x-)) * (-1/2) 
-        self.bias = - np.dot(x[top2_sv_indices], W).mean()
+        self.bias = - np.dot(x[top2_sv_indices], self.W).mean()
 
     def eval(self, x):
 
@@ -72,9 +74,9 @@ class one_vs_one_SVM:
         """
 
         # 1クラスの数
-        num = len(y) // self.class_num
+        num = len(x) // self.class_num
 
-        for combi in self.combinations:
+        for combi in tqdm(self.combinations):
 
             # combi[0] vs combi[1] svmを生成
             svm = binary_SVM(self.dim)
@@ -83,6 +85,11 @@ class one_vs_one_SVM:
             vs_x = np.concatenate([x[num*combi[0]:num*(combi[0]+1)], x[num*combi[1]:num*(combi[1]+1)]], axis=0)
             # combi[0]が+1, combi[1]が-1
             vs_y = np.array([1 if i < num else -1 for i in range(num*2)])
+
+            # シャッフル
+            perm = np.random.permutation(num*2)
+            vs_x = vs_x[perm]
+            vs_y = vs_y[perm]
 
             # 学習
             svm.train(vs_x, vs_y)
@@ -97,7 +104,7 @@ class one_vs_one_SVM:
         # 全ての画像分の勝敗表
         standings = np.zeros((self.class_num, self.class_num, N))
 
-        for i, combi in enumerate(self.combinations):
+        for i, combi in enumerate(tqdm(self.combinations)):
             # 各svmに全画像を入力し、出力
             output = self.svm_list[i].eval(x)
             # 勝敗表に記入(上半分のみ)
