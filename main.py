@@ -2,7 +2,7 @@ import numpy as np
 from tqdm import tqdm
 from skimage import io
 
-from svm import one_vs_one_SVM
+from svm import one_vs_one_SVM, one_vs_other_SVM
 
 def LoadDataset(DataFile, SampleNum, ClassNum, ImageSize):
     """
@@ -76,7 +76,8 @@ if __name__ == '__main__':
     # test_x, test_t = test_x[:20], test_t[:20]
     # ClassNum = 2
 
-    SVM = one_vs_one_SVM(ClassNum, ImageSize**2)
+    # SVM = one_vs_one_SVM(ClassNum, ImageSize**2)
+    SVM = one_vs_other_SVM(ClassNum, ImageSize**2)
     # 学習
     SVM.train(train_x)
     # 推測
