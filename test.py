@@ -147,11 +147,6 @@ if __name__ == '__main__':
     OutNum = 100
     OutImageSize = 8
 
-    # ImageCompression(TrainingDataFile, OutFile, TrainingSampleNum, ClassNum, ImageSize)
-
-    # train_x, train_y = LoadDataset(TrainingDataFile, TrainingSampleNum, ClassNum, ImageSize)
-    # test_x, test_y = LoadDataset(TestDataFile, TestSampleNum, ClassNum, ImageSize)
-
     x, y = LoadDataset(OutFile, OutNum, ClassNum, OutImageSize)
 
     d = 4
