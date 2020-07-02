@@ -64,6 +64,7 @@ class one_vs_one_SVM:
 
         # クラスの組み合わせ
         self.combinations = np.array(list(itertools.combinations([i for i in range(class_num)], 2)))
+        print(self.combinations)
 
         # one_vs_one_SVMのリスト(combinationsの順に格納)
         self.svm_list = []
@@ -106,13 +107,23 @@ class one_vs_one_SVM:
 
         for i, combi in enumerate(tqdm(self.combinations)):
             # 各svmに全画像を入力し、出力
-            output = self.svm_list[i].eval(x)
-            # 勝敗表に記入(上半分のみ)
-            standings[combi[0], combi[1]] = output
+            outputs = self.svm_list[i].eval(x)
+
+            # 勝敗表に記入
+            for i, out in enumerate(outputs):
+                # 出力が1なら上半分に1を記入
+                if out == 1:
+                    standings[combi[0], combi[1], i] = 1
+                # 出力が0なら下半分に1を記入
+                else:
+                    standings[combi[1], combi[0], i] = 1
 
         # 各画像での各svmの勝ち数
         standings = standings.transpose(2, 0, 1)
-        win_nums = np.sum(standings, axis=1)
+        win_nums = np.sum(standings, axis=2)
+
+        print(standings)
+        print(win_nums)
 
         # 勝ち数が一番多いラベルを出力
         eval_y = np.argmax(win_nums, axis=1)

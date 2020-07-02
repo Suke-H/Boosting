@@ -71,6 +71,11 @@ if __name__ == '__main__':
     train_x, train_t = LoadDataset(TrainingDataFile, TrainingSampleNum, ClassNum, ImageSize)
     test_x, test_t = LoadDataset(TestDataFile, TestSampleNum, ClassNum, ImageSize)
 
+    # # 今回のみ
+    # train_x, train_t = train_x[:400], train_t[:400]
+    # test_x, test_t = test_x[:20], test_t[:20]
+    # ClassNum = 2
+
     SVM = one_vs_one_SVM(ClassNum, ImageSize**2)
     # 学習
     SVM.train(train_x)
