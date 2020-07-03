@@ -2,7 +2,8 @@ import numpy as np
 from tqdm import tqdm
 from skimage import io
 
-from svm import one_vs_one_SVM, one_vs_other_SVM
+from svm import binary_SVM, one_vs_one_SVM, one_vs_other_SVM
+from ecc import ErrorDetectAndCorrect, HadamardMatrix
 
 def LoadDataset(DataFile, SampleNum, ClassNum, ImageSize):
     """
@@ -61,6 +62,10 @@ def TestResult(ys, ts, ClassNum):
     print ("TOTAL: {0:.4f}".format(total_correct_num / Num))
 
 if __name__ == '__main__':
+
+    print(HadamardMatrix(4, 3))
+    a = input()
+
     TrainingSampleNum = 2000 # 学習サンプル総数
     TestSampleNum = 100 # テストサンプル総数
     ClassNum = 10 # クラス数（今回は10）
@@ -71,16 +76,27 @@ if __name__ == '__main__':
     train_x, train_t = LoadDataset(TrainingDataFile, TrainingSampleNum, ClassNum, ImageSize)
     test_x, test_t = LoadDataset(TestDataFile, TestSampleNum, ClassNum, ImageSize)
 
-    # # 今回のみ
-    # train_x, train_t = train_x[:400], train_t[:400]
-    # test_x, test_t = test_x[:20], test_t[:20]
-    # ClassNum = 2
+    # 今回のみ
+    train_x, train_t = train_x[:600], train_t[:600]
+    test_x, test_t = test_x[:30], test_t[:30]
+    ClassNum = 3
 
     # SVM = one_vs_one_SVM(ClassNum, ImageSize**2)
-    SVM = one_vs_other_SVM(ClassNum, ImageSize**2)
+    # SVM = one_vs_other_SVM(ClassNum, ImageSize**2)
+    # # 学習
+    # SVM.train(train_x)
+    # # 推測
+    # y = SVM.eval(test_x)
+    # # 結果をまとめる
+    # TestResult(y, test_t, ClassNum)
+
+    SVM = binary_SVM(ImageSize**2)
+
+    ECC = ErrorDetectAndCorrect(SVM, 4, ClassNum, ImageSize**2)
     # 学習
-    SVM.train(train_x)
+    ECC.train(train_x)
     # 推測
-    y = SVM.eval(test_x)
+    y = ECC.eval(test_x)
     # 結果をまとめる
     TestResult(y, test_t, ClassNum)
+

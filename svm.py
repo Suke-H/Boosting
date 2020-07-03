@@ -49,8 +49,8 @@ class binary_SVM:
         # y = wx + b
         eval_y = np.dot(self.W, x.T) + self.bias
 
-        # y >= 0なら1、y < 0なら0を出力
-        output = np.zeros(N)
+        # y >= 0なら1、y < 0なら-1を出力
+        output = np.full(N, -1)
         p_indices = np.where(eval_y >= 0)
         output[p_indices] = 1
 
@@ -109,7 +109,7 @@ class one_vs_one_SVM:
                 # 出力が1なら上半分に1を記入
                 if out == 1:
                     standings[combi[0], combi[1], i] = 1
-                # 出力が0なら下半分に1を記入
+                # 出力が-1なら下半分に1を記入
                 else:
                     standings[combi[1], combi[0], i] = 1
 
@@ -188,7 +188,7 @@ class one_vs_other_SVM:
                 if out == 1:
                     win_nums[j, label] += 1
 
-                # 出力が0ならそのラベル以外+1
+                # 出力が-1ならそのラベル以外+1
                 else:
                     other_index = np.delete(np.array([i for i in range(self.class_num)]), label)
                     win_nums[j, other_index] += 1
