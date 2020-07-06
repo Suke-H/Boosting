@@ -4,6 +4,8 @@ from skimage import io
 
 from svm import binary_SVM, one_vs_one_SVM, one_vs_other_SVM
 from ecc import ErrorDetectAndCorrect, HadamardMatrix
+from boosting import AdaBoost
+from multi_class import one_vs_one, one_vs_other
 
 def LoadDataset(DataFile, SampleNum, ClassNum, ImageSize):
     """
@@ -63,40 +65,39 @@ def TestResult(ys, ts, ClassNum):
 
 if __name__ == '__main__':
 
-    print(HadamardMatrix(4, 3))
-    a = input()
-
     TrainingSampleNum = 2000 # 学習サンプル総数
     TestSampleNum = 100 # テストサンプル総数
     ClassNum = 10 # クラス数（今回は10）
-    ImageSize = 8 # 画像サイズ（今回は縦横ともに8）
-    TrainingDataFile = './Images/TrainingCompressionSamples/{0:1d}-{1:04d}.png'
-    TestDataFile = './Images/TestCompressionSamples/{0:1d}-{1:04d}.png'
+    # ImageSize = 8 # 画像サイズ（今回は縦横ともに8）
+    ImageSize = 28 
+    # TrainingDataFile = './Images/TrainingCompressionSamples/{0:1d}-{1:04d}.png'
+    # TestDataFile = './Images/TestCompressionSamples/{0:1d}-{1:04d}.png'
+    TrainingDataFile = './Images/TrainingSamples/{0:1d}-{1:04d}.png'
+    TestDataFile = './Images/TestSamples/{0:1d}-{1:04d}.png'
 
     train_x, train_t = LoadDataset(TrainingDataFile, TrainingSampleNum, ClassNum, ImageSize)
     test_x, test_t = LoadDataset(TestDataFile, TestSampleNum, ClassNum, ImageSize)
 
-    # 今回のみ
-    train_x, train_t = train_x[:600], train_t[:600]
-    test_x, test_t = test_x[:30], test_t[:30]
-    ClassNum = 3
-
-    # SVM = one_vs_one_SVM(ClassNum, ImageSize**2)
-    # SVM = one_vs_other_SVM(ClassNum, ImageSize**2)
-    # # 学習
-    # SVM.train(train_x)
-    # # 推測
-    # y = SVM.eval(test_x)
-    # # 結果をまとめる
-    # TestResult(y, test_t, ClassNum)
-
+    
+    # Adaboost
     SVM = binary_SVM(ImageSize**2)
+    adaboost = AdaBoost(SVM, 10)
 
-    ECC = ErrorDetectAndCorrect(SVM, 4, ClassNum, ImageSize**2)
+    multi = one_vs_one(SVM, ClassNum, ImageSize**2)
+
+    multi = one_vs_one_SVM(ClassNum, ImageSize**2)
+    # multi = one_vs_other_SVM(ClassNum, ImageSize**2)
     # 学習
-    ECC.train(train_x)
+    multi.train(train_x)
     # 推測
-    y = ECC.eval(test_x)
+    y = multi.eval(test_x)
+
+    # ECC = ErrorDetectAndCorrect(SVM, 4, ClassNum, ImageSize**2)
+    # # 学習
+    # ECC.train(train_x)
+    # # 推測
+    # y = ECC.eval(test_x)
     # 結果をまとめる
+
     TestResult(y, test_t, ClassNum)
 
