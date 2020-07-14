@@ -2,6 +2,7 @@ import numpy as np
 import cvxopt
 import itertools
 from tqdm import tqdm
+from copy import copy
 
 from svm import binary_SVM
 from boosting import AdaBoost
@@ -14,9 +15,10 @@ class one_vs_one:
 
         # クラスの組み合わせ
         self.combinations = np.array(list(itertools.combinations([i for i in range(class_num)], 2)))
+        print(len(self.combinations))
 
         # one_vs_one_modelのリスト(combinationsの順に格納)
-        self.model_list = [model for i in range(class_num*(class_num-1) // 2)]
+        self.model_list = [copy(model) for i in range(class_num*(class_num-1) // 2)]
 
     def train(self, x):
         """
@@ -27,7 +29,7 @@ class one_vs_one:
         # 1クラスの数
         num = len(x) // self.class_num
 
-        for i, combi in enumerate(tqdm(self.combinations)):
+        for j, combi in enumerate(tqdm(self.combinations)):
 
             # combi[0]とcombi[1]のデータを結合
             vs_x = np.concatenate([x[num*combi[0]:num*(combi[0]+1)], x[num*combi[1]:num*(combi[1]+1)]], axis=0)
@@ -35,7 +37,7 @@ class one_vs_one:
             vs_y = np.array([1 if i < num else -1 for i in range(num*2)])
 
             # 学習
-            self.model_list[i].train(vs_x, vs_y)
+            self.model_list[j].train(vs_x, vs_y)
 
     def eval(self, x):
 
@@ -46,8 +48,6 @@ class one_vs_one:
             print(m.W)
             print(m.bias)
 
-        a = input()
-
         # 全ての画像分の勝敗表
         standings = np.zeros((self.class_num, self.class_num, N))
 
@@ -56,13 +56,13 @@ class one_vs_one:
             outputs = self.model_list[i].eval(x)
 
             # 勝敗表に記入
-            for i, out in enumerate(outputs):
+            for j, out in enumerate(outputs):
                 # 出力が1なら上半分に1を記入
                 if out == 1:
-                    standings[combi[0], combi[1], i] = 1
+                    standings[combi[0], combi[1], j] = 1
                 # 出力が-1なら下半分に1を記入
                 else:
-                    standings[combi[1], combi[0], i] = 1
+                    standings[combi[1], combi[0], j] = 1
 
         # 各画像での各modelの勝ち数
         standings = standings.transpose(2, 0, 1)
@@ -78,14 +78,14 @@ class one_vs_one:
 
 class one_vs_other:
 
-    def __init__(self, class_num, dim):
+    def __init__(self, model, class_num, dim):
 
         self.class_num = class_num
         self.dim = dim
 
         # one_vs_other_modelのリスト
         # (0_vs_other, 1_vs_other, ...の順に格納)
-        self.model_list = [model for i in range(class_num)]
+        self.model_list = [copy(model) for i in range(class_num*(class_num-1) // 2)]
 
     def train(self, x):
         """
@@ -95,7 +95,7 @@ class one_vs_other:
         # 1クラスの数
         num = len(x) // self.class_num
 
-        for label in tqdm(range(self.class_num)):
+        for j, label in enumerate(tqdm(range(self.class_num))):
 
             # labelとotherを結合
             # otherは1クラスの数分をランダムで取ってくる
@@ -114,11 +114,16 @@ class one_vs_other:
             print(vs_x.shape, vs_y.shape)
 
             # 学習
-            self.model_list[i].train(vs_x, vs_y)
+            self.model_list[j].train(vs_x, vs_y)
 
     def eval(self, x):
 
         N = len(x)
+
+        for m in self.model_list:
+            print("="*50)
+            print(m.W)
+            print(m.bias)
 
         # 勝った回数
         win_nums = np.zeros((N, self.class_num))

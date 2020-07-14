@@ -84,8 +84,9 @@ if __name__ == '__main__':
     adaboost = AdaBoost(SVM, 10)
 
     multi = one_vs_one(SVM, ClassNum, ImageSize**2)
+    # multi = one_vs_other(SVM, ClassNum, ImageSize**2)
 
-    multi = one_vs_one_SVM(ClassNum, ImageSize**2)
+    # multi = one_vs_one_SVM(ClassNum, ImageSize**2)
     # multi = one_vs_other_SVM(ClassNum, ImageSize**2)
     # 学習
     multi.train(train_x)

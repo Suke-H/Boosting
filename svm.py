@@ -105,13 +105,82 @@ class one_vs_one_SVM:
             outputs = self.svm_list[i].eval(x)
 
             # 勝敗表に記入
-            for i, out in enumerate(outputs):
+            for j, out in enumerate(outputs):
                 # 出力が1なら上半分に1を記入
                 if out == 1:
-                    standings[combi[0], combi[1], i] = 1
+                    standings[combi[0], combi[1], j] = 1
                 # 出力が-1なら下半分に1を記入
                 else:
-                    standings[combi[1], combi[0], i] = 1
+                    standings[combi[1], combi[0], j] = 1
+
+        # 各画像での各svmの勝ち数
+        standings = standings.transpose(2, 0, 1)
+        win_nums = np.sum(standings, axis=2)
+
+        print(standings)
+        print(win_nums)
+
+        # 勝ち数が一番多いラベルを出力
+        eval_y = np.argmax(win_nums, axis=1)
+        
+        return eval_y
+
+class one_vs_one:
+    def __init__(self, model, class_num, dim):
+
+        self.class_num = class_num
+        self.dim = dim
+
+        # クラスの組み合わせ
+        self.combinations = np.array(list(itertools.combinations([i for i in range(class_num)], 2)))
+        print(self.combinations)
+
+        # one_vs_one_SVMのリスト(combinationsの順に格納)
+        self.svm_list = []
+
+    def train(self, x):
+        """
+        xは0, 1, ..., 9の順で同じ数並んでいるとする
+        """
+
+        # 1クラスの数
+        num = len(x) // self.class_num
+
+        for combi in tqdm(self.combinations):
+
+            # combi[0] vs combi[1] svmを生成
+            svm = binary_SVM(self.dim)
+
+            # combi[0]とcombi[1]のデータを結合
+            vs_x = np.concatenate([x[num*combi[0]:num*(combi[0]+1)], x[num*combi[1]:num*(combi[1]+1)]], axis=0)
+            # combi[0]が+1, combi[1]が-1
+            vs_y = np.array([1 if i < num else -1 for i in range(num*2)])
+
+            # 学習
+            svm.train(vs_x, vs_y)
+
+            # svm_listに保存
+            self.svm_list.append(svm)
+
+    def eval(self, x):
+
+        N = len(x)
+
+        # 全ての画像分の勝敗表
+        standings = np.zeros((self.class_num, self.class_num, N))
+
+        for i, combi in enumerate(tqdm(self.combinations)):
+            # 各svmに全画像を入力し、出力
+            outputs = self.svm_list[i].eval(x)
+
+            # 勝敗表に記入
+            for j, out in enumerate(outputs):
+                # 出力が1なら上半分に1を記入
+                if out == 1:
+                    standings[combi[0], combi[1], j] = 1
+                # 出力が-1なら下半分に1を記入
+                else:
+                    standings[combi[1], combi[0], j] = 1
 
         # 各画像での各svmの勝ち数
         standings = standings.transpose(2, 0, 1)
