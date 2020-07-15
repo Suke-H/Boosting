@@ -85,7 +85,7 @@ if __name__ == '__main__':
     # multi = one_vs_one(binary_SVM, ClassNum, ImageSize**2)
     # multi = one_vs_other(binary_SVM, ClassNum, ImageSize**2)
 
-    multi = one_vs_one(SVM, ClassNum, ImageSize**2)
+    multi = one_vs_one(binary_SVM, ClassNum, ImageSize**2)
     # multi = one_vs_other(adaboost, ClassNum, ImageSize**2)
 
     # 学習

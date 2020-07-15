@@ -36,13 +36,7 @@ class one_vs_one:
             vs_y = np.array([1 if i < num else -1 for i in range(num*2)])
 
             # 学習
-            # self.model_list[j].train(vs_x, vs_y)
-
-            ImageSize = 28 
-            binary_SVM = SVM(ImageSize**2)
-            adaboost = AdaBoost(binary_SVM, 10)
-            adaboost.train(vs_x, vs_y)
-            self.model_list.append(adaboost)
+            self.model_list[j].train(vs_x, vs_y)
 
     def eval(self, x):
 
@@ -85,9 +79,7 @@ class one_vs_other:
 
         # one_vs_other_modelのリスト
         # (0_vs_other, 1_vs_other, ...の順に格納)
-        # self.model_list = [copy(model) for i in range(class_num)]
-        # self.model = model
-        self.model_list = []
+        self.model_list = [copy(model) for i in range(class_num)]
 
     def train(self, x):
         """
@@ -110,16 +102,7 @@ class one_vs_other:
             vs_y = np.array([1 if i < num else -1 for i in range(num*2)])
 
             # 学習
-            # self.model_list[j].train(vs_x, vs_y)
-            # copy_model = copy(self.model).train(vs_x, vs_y)
-            # self.model_list.append(copy_model)
-
-            ImageSize = 28 
-            binary_SVM = SVM(ImageSize**2)
-            adaboost = AdaBoost(binary_SVM, 10)
-            adaboost.train(vs_x, vs_y)
-            self.model_list.append(adaboost)
-            
+            self.model_list[j].train(vs_x, vs_y)
 
     def eval(self, x):
 
