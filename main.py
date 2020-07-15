@@ -2,7 +2,7 @@ import numpy as np
 from tqdm import tqdm
 from skimage import io
 
-from svm import binary_SVM, one_vs_one_SVM, one_vs_other_SVM
+from svm import SVM
 from ecc import ErrorDetectAndCorrect, HadamardMatrix
 from boosting import AdaBoost
 from multi_class import one_vs_one, one_vs_other
@@ -77,28 +77,21 @@ if __name__ == '__main__':
 
     train_x, train_t = LoadDataset(TrainingDataFile, TrainingSampleNum, ClassNum, ImageSize)
     test_x, test_t = LoadDataset(TestDataFile, TestSampleNum, ClassNum, ImageSize)
-
     
     # Adaboost
-    SVM = binary_SVM(ImageSize**2)
-    adaboost = AdaBoost(SVM, 10)
+    binary_SVM = SVM(ImageSize**2)
+    adaboost = AdaBoost(binary_SVM, 5)
+
+    # multi = one_vs_one(binary_SVM, ClassNum, ImageSize**2)
+    # multi = one_vs_other(binary_SVM, ClassNum, ImageSize**2)
 
     multi = one_vs_one(SVM, ClassNum, ImageSize**2)
-    # multi = one_vs_other(SVM, ClassNum, ImageSize**2)
+    # multi = one_vs_other(adaboost, ClassNum, ImageSize**2)
 
-    # multi = one_vs_one_SVM(ClassNum, ImageSize**2)
-    # multi = one_vs_other_SVM(ClassNum, ImageSize**2)
     # 学習
     multi.train(train_x)
     # 推測
     y = multi.eval(test_x)
-
-    # ECC = ErrorDetectAndCorrect(SVM, 4, ClassNum, ImageSize**2)
-    # # 学習
-    # ECC.train(train_x)
-    # # 推測
-    # y = ECC.eval(test_x)
-    # 結果をまとめる
 
     TestResult(y, test_t, ClassNum)
 

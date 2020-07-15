@@ -4,7 +4,7 @@ import itertools
 from tqdm import tqdm
 from copy import copy
 
-from svm import binary_SVM
+from svm import SVM
 from boosting import AdaBoost
 
 class one_vs_one:
@@ -15,7 +15,6 @@ class one_vs_one:
 
         # クラスの組み合わせ
         self.combinations = np.array(list(itertools.combinations([i for i in range(class_num)], 2)))
-        print(len(self.combinations))
 
         # one_vs_one_modelのリスト(combinationsの順に格納)
         self.model_list = [copy(model) for i in range(class_num*(class_num-1) // 2)]
@@ -37,16 +36,17 @@ class one_vs_one:
             vs_y = np.array([1 if i < num else -1 for i in range(num*2)])
 
             # 学習
-            self.model_list[j].train(vs_x, vs_y)
+            # self.model_list[j].train(vs_x, vs_y)
+
+            ImageSize = 28 
+            binary_SVM = SVM(ImageSize**2)
+            adaboost = AdaBoost(binary_SVM, 10)
+            adaboost.train(vs_x, vs_y)
+            self.model_list.append(adaboost)
 
     def eval(self, x):
 
         N = len(x)
-
-        for m in self.model_list:
-            print("="*50)
-            print(m.W)
-            print(m.bias)
 
         # 全ての画像分の勝敗表
         standings = np.zeros((self.class_num, self.class_num, N))
@@ -85,7 +85,9 @@ class one_vs_other:
 
         # one_vs_other_modelのリスト
         # (0_vs_other, 1_vs_other, ...の順に格納)
-        self.model_list = [copy(model) for i in range(class_num*(class_num-1) // 2)]
+        # self.model_list = [copy(model) for i in range(class_num)]
+        # self.model = model
+        self.model_list = []
 
     def train(self, x):
         """
@@ -107,14 +109,17 @@ class one_vs_other:
             # ラベルがlabelのとき1, それ以外を-1にする
             vs_y = np.array([1 if i < num else -1 for i in range(num*2)])
 
-            # label以外のxを全てotherに回す場合(遅いうえによくない)
-            # vs_x = x[:, :]
-            # vs_y = np.array([1 if label*num <= i <= (label+1)*num else -1 for i in range(len(x))])
-
-            print(vs_x.shape, vs_y.shape)
-
             # 学習
-            self.model_list[j].train(vs_x, vs_y)
+            # self.model_list[j].train(vs_x, vs_y)
+            # copy_model = copy(self.model).train(vs_x, vs_y)
+            # self.model_list.append(copy_model)
+
+            ImageSize = 28 
+            binary_SVM = SVM(ImageSize**2)
+            adaboost = AdaBoost(binary_SVM, 10)
+            adaboost.train(vs_x, vs_y)
+            self.model_list.append(adaboost)
+            
 
     def eval(self, x):
 
@@ -122,8 +127,8 @@ class one_vs_other:
 
         for m in self.model_list:
             print("="*50)
-            print(m.W)
-            print(m.bias)
+            print(m.alpha)
+        a = input()
 
         # 勝った回数
         win_nums = np.zeros((N, self.class_num))
