@@ -108,11 +108,6 @@ class one_vs_other:
 
         N = len(x)
 
-        for m in self.model_list:
-            print("="*50)
-            print(m.alpha)
-        a = input()
-
         # 勝った回数
         win_nums = np.zeros((N, self.class_num))
 
